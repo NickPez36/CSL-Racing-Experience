@@ -608,6 +608,7 @@
 
                     const race = {
                         year: year,
+                        competition: competition, // <-- 1. Keep the competition name
                         qualityPenalty: parseFloat(parts[2].replace('qp:', '').trim())
                     };
                     
@@ -636,11 +637,11 @@
 
                 if (!statsByPeriod[period]) {
                     statsByPeriod[period] = {
-                        count: 0,
+                        races: [], // <-- 2. Store full race objects
                         qpValues: []
                     };
                 }
-                statsByPeriod[period].count++;
+                statsByPeriod[period].races.push(race); // <-- 3. Add the whole race object
                 if (!isNaN(race.qualityPenalty)) {
                     statsByPeriod[period].qpValues.push(race.qualityPenalty);
                 }
@@ -651,7 +652,9 @@
             const labels = sortedPeriods.map(String); // Chart labels
             
             // --- Athlete's Data ---
-            const racesPerPeriod = labels.map(p => statsByPeriod[p].count);
+            const racesPerPeriod = labels.map(p => statsByPeriod[p].races.length); // <-- 4. Get count from .races.length
+            const raceListsByPeriod = labels.map(p => statsByPeriod[p].races.map(r => r.competition)); // <-- 5. Create list of names
+            
             const avgQualityPenalty = labels.map(p => {
                 const qp = statsByPeriod[p].qpValues;
                 return qp.length > 0 ? (qp.reduce((a, b) => a + b, 0) / qp.length) : 0;
@@ -699,6 +702,7 @@
                         {
                             label: `Races per ${periodLabel}`,
                             data: racesPerPeriod,
+                            competitionNames: raceListsByPeriod, // <-- 6. Pass race names to dataset
                             backgroundColor: 'rgba(0, 82, 204, 0.7)',
                             borderColor: 'rgba(0, 82, 204, 1)',
                             borderWidth: 1,
@@ -713,11 +717,32 @@
                     },
                     plugins: { 
                         title: { display: true, text: `Races Completed per ${periodLabel}`, font: { size: 16 } },
-                        tooltip: {
+                        tooltip: { // <-- 7. Add custom tooltip
+                            footerSpacing: 4,
+                            footerAlign: 'left',
                             callbacks: {
                                 label: function(context) {
-                                    if (context.dataset.isBenchmark) return; // Hide tooltip for benchmark
+                                    if (context.dataset.isBenchmark) return; 
                                     return context.dataset.label + ': ' + context.formattedValue;
+                                },
+                                footer: function(tooltipItems) {
+                                    if (!tooltipItems.length) return '';
+                                    const context = tooltipItems[0];
+                                    const dataIndex = context.dataIndex;
+                                    const dataset = context.chart.data.datasets[context.datasetIndex];
+                                    
+                                    // Retrieve our custom data
+                                    const raceNames = dataset.competitionNames ? dataset.competitionNames[dataIndex] : null;
+
+                                    if (raceNames && raceNames.length > 0) {
+                                        const listItems = raceNames.map(name => {
+                                            // Truncate long names
+                                            const shortName = name.length > 40 ? name.substring(0, 37) + '...' : name;
+                                            return `• ${shortName}`;
+                                        });
+                                        return [`\nRaces in this period:`, ...listItems];
+                                    }
+                                    return ''; 
                                 }
                             }
                         }
@@ -771,6 +796,7 @@
                         {
                             label: 'Average Quality Penalty',
                             data: avgQualityPenalty,
+                            competitionNames: raceListsByPeriod, // <-- 8. Pass race names to dataset
                             backgroundColor: 'rgba(214, 51, 0, 0.7)',
                             borderColor: 'rgba(214, 51, 0, 1)',
                             borderWidth: 1,
@@ -786,11 +812,30 @@
                     },
                     plugins: { 
                         title: { display: true, text: `Average Quality Penalty per ${periodLabel}`, font: { size: 16 } },
-                        tooltip: {
+                        tooltip: { // <-- 9. Add custom tooltip (same logic)
+                            footerSpacing: 4,
+                            footerAlign: 'left',
                             callbacks: {
                                 label: function(context) {
                                     if (context.dataset.isBenchmark) return; 
                                     return context.dataset.label + ': ' + context.formattedValue;
+                                },
+                                footer: function(tooltipItems) {
+                                    if (!tooltipItems.length) return '';
+                                    const context = tooltipItems[0];
+                                    const dataIndex = context.dataIndex;
+                                    const dataset = context.chart.data.datasets[context.datasetIndex];
+                                    
+                                    const raceNames = dataset.competitionNames ? dataset.competitionNames[dataIndex] : null;
+
+                                    if (raceNames && raceNames.length > 0) {
+                                        const listItems = raceNames.map(name => {
+                                            const shortName = name.length > 40 ? name.substring(0, 37) + '...' : name;
+                                            return `• ${shortName}`;
+                                        });
+                                        return [`\nRaces in this period:`, ...listItems];
+                                    }
+                                    return ''; 
                                 }
                             }
                         }
