@@ -509,17 +509,20 @@
                 // instead of just an array ([...]).
                 let rawData = raceResult.value;
                 if (Array.isArray(rawData)) {
+                    // This handles files that are a simple array: [...]
                     allData = rawData;
                 } else if (typeof rawData === 'object' && rawData !== null) {
-                    // Try to find the first property that is an array
-                    const arrayKey = Object.keys(rawData).find(key => Array.isArray(rawData[key]));
-                    if (arrayKey) {
-                        allData = rawData[arrayKey];
-                        console.log(`Found data in object property: ${arrayKey}`);
-                    } else {
-                        console.error("Fetched race data is an object, but no array property was found.");
-                        allData = []; // Set to empty array to prevent further errors
+                    // FIX: This now handles files that are an object of arrays: { "AUS": [...], "GBR": [...] }
+                    // Instead of taking the *first* key, we combine *all* keys.
+                    let combinedData = [];
+                    const nationKeys = Object.keys(rawData); // Get ["AUS", "GBR", "FRA", ...]
+                    for (const nation of nationKeys) {
+                        if (Array.isArray(rawData[nation])) {
+                            combinedData = combinedData.concat(rawData[nation]); // Add all arrays together
+                        }
                     }
+                    allData = combinedData;
+                    console.log(`Combined data from ${nationKeys.length} nations.`);
                 } else {
                     console.error("Fetched race data is not an array or a recognized object.");
                     allData = [];
