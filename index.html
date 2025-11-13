@@ -200,22 +200,31 @@
         </header>
 
         <section id="loading-status">
-            <div id="loading-race" class="loading-item loading">
-                <span class="spinner"></span> <strong>Loading Race Data...</strong>
-            </div>
+            <!-- This one loads on page start -->
             <div id="loading-dob" class="loading-item loading">
                 <span class="spinner"></span> <strong>Loading DOB Data...</strong>
             </div>
-            <div id="loading-benchmark" class="loading-item loading">
-                <span class="spinner"></span> <strong>Loading Benchmarks...</strong>
+            <!-- These wait for class selection -->
+            <div id="loading-race" class="loading-item">
+                <strong>Waiting for Class Selection...</strong>
+            </div>
+            <div id="loading-benchmark" class="loading-item">
+                <strong>Waiting for Class Selection...</strong>
             </div>
         </section>
 
         <section id="controls-container">
             <div class="control-group">
                 <label for="class-select">Select Class</label>
-                <select id="class-select" disabled>
-                    <option value="">-- Loading Data --</option>
+                <!-- Hardcoded class list, enabled by default -->
+                <select id="class-select">
+                    <option value="">-- Select a Class --</option>
+                    <option value="WC1">WC1</option>
+                    <option value="MC1">MC1</option>
+                    <option value="WK1">WK1</option>
+                    <option value="MK1">MK1</option>
+                    <option value="MX1">MX1</option>
+                    <option value="WX1">WX1</option>
                 </select>
             </div>
             
@@ -299,9 +308,14 @@
         const GITHUB_BRANCH = "main"; // Assuming default branch is 'main'
 
         // === File Paths ===
-        const RACE_DATA_PATH = `data/2014-2025-WC1-all_wr_data.json`;
+        // Global file path
         const DOB_DATA_PATH = `data/dob_list.json`;
-        const BENCHMARK_DATA_PATH = `data/benchmarks.json`;
+        
+        // Dynamic file path patterns
+        // FIX: Updated to match user's new file structure (e.g., "WC1-all_wr_data.json")
+        //      And removed accidental space before .json
+        const RACE_DATA_PATTERN = (className) => `data/${className}-all_wr_data.json`;
+        const BENCHMARK_DATA_PATTERN = (className) => `data/${className}_benchmarks.json`;
 
         // === DOM Elements ===
         const loadingRace = document.getElementById('loading-race');
@@ -318,14 +332,20 @@
         
         const resultsSection = document.getElementById('results');
 
-        // === 1. Data Fetching on Load ===
-        window.addEventListener('DOMContentLoaded', loadAllData);
+        // === 1. Data Fetching on Load (DOB Only) ===
+        window.addEventListener('DOMContentLoaded', loadGlobalData);
 
         /**
          * Fetches a file from the GitHub repo
          */
         async function fetchFile(filePath, statusElement, fileLabel) {
-            const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${filePath}`;
+            // Add a cache-busting query parameter
+            const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${filePath}?t=${new Date().getTime()}`;
+            
+            // Set loading state on the status element
+            statusElement.className = 'loading-item loading';
+            statusElement.innerHTML = `<span class="spinner"></span> <strong>Loading ${fileLabel}...</strong>`;
+
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
@@ -334,51 +354,23 @@
                 const jsonData = await response.json();
                 statusElement.textContent = `${fileLabel} Loaded`;
                 statusElement.className = 'loading-item success';
-                return jsonData;
+                return { status: 'fulfilled', value: jsonData };
             } catch (error) {
                 console.error(`Error fetching ${fileLabel}:`, error);
                 statusElement.textContent = `${fileLabel} Failed to Load`;
                 statusElement.className = 'loading-item error';
-                throw error; // Re-throw to be caught by Promise.allSettled
+                return { status: 'rejected', reason: error };
             }
         }
 
         /**
-         * Main function to load all data sources
+         * Main function to load global data (DOB list)
          */
-        async function loadAllData() {
-            // Use Promise.allSettled to ensure all fetches complete, even if one fails
-            const results = await Promise.allSettled([
-                fetchFile(RACE_DATA_PATH, loadingRace, "Race Data"),
-                fetchFile(DOB_DATA_PATH, loadingDob, "DOB Data"),
-                fetchFile(BENCHMARK_DATA_PATH, loadingBenchmark, "Benchmarks")
-            ]);
+        async function loadGlobalData() {
+            const result = await fetchFile(DOB_DATA_PATH, loadingDob, "DOB Data");
 
-            // --- Process Race Data (Critical) ---
-            if (results[0].status === 'fulfilled') {
-                allData = results[0].value;
-                processRaceData();
-                
-                // Enable class dropdown
-                classSelect.disabled = false;
-                
-                // Populate class dropdown
-                const classes = Object.keys(classAthleteMap).sort();
-                classSelect.innerHTML = '<option value="">-- Select a Class --</option>';
-                classes.forEach(cls => {
-                    const option = document.createElement('option');
-                    option.value = cls;
-                    option.textContent = cls;
-                    classSelect.appendChild(option);
-                });
-            } else {
-                classSelect.innerHTML = '<option value="">-- RACE DATA FAILED --</option>';
-                console.error("Failed to load critical race data.");
-            }
-
-            // --- Process DOB Data (Optional but recommended) ---
-            if (results[1].status === 'fulfilled') {
-                const dobJson = results[1].value;
+            if (result.status === 'fulfilled') {
+                const dobJson = result.value;
                 dobData = {}; // Clear old data
                 for (const athlete of dobJson) {
                     const normName = normalizeName(athlete.athlete_name);
@@ -387,18 +379,14 @@
                     }
                 }
                 dobDataLoaded = true;
-            }
-
-            // --- Process Benchmark Data (Optional) ---
-            if (results[2].status === 'fulfilled') {
-                benchmarkData = results[2].value;
-                benchmarkDataLoaded = true;
+            } else {
+                console.error("Failed to load critical DOB data.");
             }
         }
 
 
         // === 2. Data Processing and Controls ===
-
+        
         /**
          * Normalizes "First LAST" or "LAST, First" to "LAST,FIRST"
          */
@@ -443,15 +431,20 @@
         
         /**
          * Processes raw race data to build the Class -> Athlete map
+         * This now operates on the new global `allData`
          */
         function processRaceData() {
             const athleteNameCache = new Map(); // Cache for name normalization
-            classAthleteMap = {};
+            classAthleteMap = {}; // Reset map
+            const selectedClass = classSelect.value;
+            if (!selectedClass) return;
+
+            const athleteMap = new Map();
 
             allData.forEach(entry => {
-                if (!entry.class || !entry.athlete_name) return;
+                // We don't need to check entry.class, as we've only loaded data for the selected class
+                if (!entry.athlete_name) return;
 
-                const cls = entry.class;
                 const name = entry.athlete_name;
                 let normName;
 
@@ -462,46 +455,95 @@
                     athleteNameCache.set(name, normName);
                 }
 
-                if (!classAthleteMap[cls]) {
-                    classAthleteMap[cls] = new Map();
-                }
-
-                if (!classAthleteMap[cls].has(normName)) {
-                    classAthleteMap[cls].set(normName, name); // Store original name for display
+                if (!athleteMap.has(normName)) {
+                    athleteMap.set(normName, name); // Store original name for display
                 }
             });
 
-            // Convert map to sorted array
-            for (const cls in classAthleteMap) {
-                const athleteMap = classAthleteMap[cls];
-                classAthleteMap[cls] = Array.from(athleteMap.entries())
-                    .map(([normName, name]) => ({ name, normName }))
-                    .sort((a, b) => a.name.localeCompare(b.name));
-            }
+            // Convert map to sorted array and store it
+            classAthleteMap[selectedClass] = Array.from(athleteMap.entries())
+                .map(([normName, name]) => ({ name, normName }))
+                .sort((a, b) => a.name.localeCompare(b.name));
         }
         
         // --- Control Listeners ---
 
-        // Class selection: Populates athlete list
-        classSelect.addEventListener('change', () => {
+        /**
+         * NEW: Main handler for fetching class-specific data
+         */
+        classSelect.addEventListener('change', async () => {
             const selectedClass = classSelect.value;
-            athleteSearch.value = ''; // Clear search
             
-            if (selectedClass) {
+            // Reset everything
+            athleteSearch.value = '';
+            athleteSearch.disabled = true;
+            athleteSelect.disabled = true;
+            populateAthleteSelect([]); // Clear athlete list
+            resultsSection.style.display = 'none';
+            viewToggle.style.display = 'none';
+            allData = [];
+            benchmarkData = {};
+            benchmarkDataLoaded = false;
+            
+            if (!selectedClass) {
+                loadingRace.textContent = 'Waiting for Class Selection...';
+                loadingRace.className = 'loading-item';
+                loadingBenchmark.textContent = 'Waiting for Class Selection...';
+                loadingBenchmark.className = 'loading-item';
+                return;
+            }
+
+            // --- Fetch class-specific data ---
+            const raceDataPath = RACE_DATA_PATTERN(selectedClass);
+            const benchmarkDataPath = BENCHMARK_DATA_PATTERN(selectedClass);
+            
+            const [raceResult, benchmarkResult] = await Promise.all([
+                fetchFile(raceDataPath, loadingRace, `${selectedClass} Race Data`),
+                fetchFile(benchmarkDataPath, loadingBenchmark, `${selectedClass} Benchmarks`)
+            ]);
+
+            // --- Process Race Data (Critical) ---
+            if (raceResult.status === 'fulfilled') {
+                // FIX: Check if the fetched data is an array, as `allData.forEach` is failing.
+                // The JSON file might be an object containing an array (e.g., {"data": [...]})
+                // instead of just an array ([...]).
+                let rawData = raceResult.value;
+                if (Array.isArray(rawData)) {
+                    allData = rawData;
+                } else if (typeof rawData === 'object' && rawData !== null) {
+                    // Try to find the first property that is an array
+                    const arrayKey = Object.keys(rawData).find(key => Array.isArray(rawData[key]));
+                    if (arrayKey) {
+                        allData = rawData[arrayKey];
+                        console.log(`Found data in object property: ${arrayKey}`);
+                    } else {
+                        console.error("Fetched race data is an object, but no array property was found.");
+                        allData = []; // Set to empty array to prevent further errors
+                    }
+                } else {
+                    console.error("Fetched race data is not an array or a recognized object.");
+                    allData = [];
+                }
+                
+                processRaceData(); // Process the new `allData`
+                
                 const athletes = classAthleteMap[selectedClass] || [];
                 populateAthleteSelect(athletes);
                 athleteSearch.disabled = false;
                 athleteSearch.placeholder = `Search ${athletes.length} athletes...`;
                 athleteSelect.disabled = false;
             } else {
-                populateAthleteSelect([]); // Clear
-                athleteSearch.disabled = true;
-                athleteSearch.placeholder = '-- Select Class First --';
-                athleteSelect.disabled = true;
+                console.error(`Failed to load race data for ${selectedClass}`);
+                athleteSearch.placeholder = '-- RACE DATA FAILED --';
             }
-            // Hide results when class changes
-            resultsSection.style.display = 'none';
-            viewToggle.style.display = 'none';
+
+            // --- Process Benchmark Data (Optional) ---
+            if (benchmarkResult.status === 'fulfilled') {
+                benchmarkData = benchmarkResult.value;
+                benchmarkDataLoaded = true;
+            } else {
+                console.warn(`No benchmark data found for ${selectedClass}. Bands will not be shown.`);
+            }
         });
 
         // Athlete search: Filters athlete dropdown
@@ -510,11 +552,11 @@
             const selectedClass = classSelect.value;
             if (!selectedClass) return;
 
-            const allAthletes = classAthleteMap[selectedClass];
+            const allAthletes = classAthleteMap[selectedClass] || [];
             const filteredAthletes = allAthletes.filter(athlete => 
                 athlete.name.toLowerCase().includes(searchTerm)
             );
-            populateAthleteSelect(filteredAthletes);
+            populateAthleteSelect(filteredAthletes, athleteSelect.value);
         });
 
         // Athlete selection: Triggers analysis
@@ -543,13 +585,17 @@
 
         /**
          * Helper to populate athlete select box
+         * Now preserves selection during search filtering
          */
-        function populateAthleteSelect(athletes) {
+        function populateAthleteSelect(athletes, selectedValue = null) {
             athleteSelect.innerHTML = '<option value="">-- Select an Athlete --</option>';
             athletes.forEach(athlete => {
                 const option = document.createElement('option');
                 option.value = athlete.normName; // Use normalized name as value
                 option.textContent = athlete.name; // Use original name for display
+                if (athlete.normName === selectedValue) {
+                    option.selected = true;
+                }
                 athleteSelect.appendChild(option);
             });
         }
@@ -571,7 +617,7 @@
         }
 
 
-        // === 3. Analysis & Charting ===
+        // === 3. Analysis & Charting (No changes needed here) ===
 
         /**
          * Main analysis function. Gathers data, processes it, and calls chart functions.
@@ -581,6 +627,7 @@
             if (!selectedNormName) return;
 
             // Step 1: Get all unique races for the selected athlete
+            // Filter `allData` (which is now class-specific) for the athlete
             const athleteEntries = allData.filter(entry => normalizeName(entry.athlete_name) === selectedNormName);
             const uniqueRaceStrings = new Set();
             for (const entry of athleteEntries) {
@@ -622,9 +669,35 @@
             }
 
             if (processedRaces.length === 0) {
-                resultsSection.innerHTML = '<h2>No valid race data found for this athlete.</h2>';
+                // Clear old results and show message
+                Object.values(chartInstances).forEach(chart => chart.destroy());
+                chartInstances = {};
+                document.getElementById('athlete-name-display').textContent = `Showing Results for: ${athleteSelect.options[athleteSelect.selectedIndex].text}`;
+                resultsSection.style.display = 'block';
+                document.getElementById('stats-tiles').style.display = 'none'; // Hide tiles
+                const chartContainers = document.querySelectorAll('.chart-container');
+                chartContainers.forEach(c => c.style.display = 'none');
+                
+                // Check if a message already exists
+                let noDataMsg = document.getElementById('no-data-message');
+                if (!noDataMsg) {
+                    noDataMsg = document.createElement('h3');
+                    noDataMsg.id = 'no-data-message';
+                    noDataMsg.style.textAlign = 'center';
+                    noDataMsg.style.color = '#555';
+                    resultsSection.insertBefore(noDataMsg, document.getElementById('stats-tiles'));
+                }
+                noDataMsg.textContent = 'No valid race data found for this athlete in the loaded dataset.';
+                noDataMsg.style.display = 'block';
                 return;
             }
+            
+            // If we have data, reset the "no data" message and show charts
+            const noDataMsg = document.getElementById('no-data-message');
+            if (noDataMsg) noDataMsg.style.display = 'none';
+            document.getElementById('stats-tiles').style.display = 'grid';
+            document.querySelectorAll('.chart-container').forEach(c => c.style.display = 'block');
+
 
             // Step 3: Determine view mode (Year vs Age)
             const viewMode = viewByAgeRadio.checked ? 'age' : 'year';
