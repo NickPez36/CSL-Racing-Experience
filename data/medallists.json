@@ -1,0 +1,109 @@
+{
+    "description": "Medallists from Senior World Championships and Olympic Games (2017-2025)",
+    "MC1": {
+        "description": "Men's Canoe Single (C1M)",
+        "athletes": [
+            "SAVSEK,BENJAMIN",
+            "SLAFKOVSKY,ALEXANDER",
+            "MARTIKAN,MICHAL",
+            "ANTON,FRANZ",
+            "WESTLEY,RYAN",
+            "TASIADIS,SIDERIS",
+            "JOLY,CEDRIC",
+            "ELOSEGI,ANDER",
+            "BOZIC,LUKA",
+            "CHALOUPKA,VACLAV",
+            "GESTIN,NICOLAS",
+            "CECCON,PAOLO",
+            "BASSETT,KAYLEN",
+            "ROHAN,LUKAS",
+            "BURGESS,ADAM",
+            "BENUS,MATEJ"
+        ]
+    },
+    "WC1": {
+        "description": "Women's Canoe Single (C1W)",
+        "athletes": [
+            "FRANKLIN,MALLORY",
+            "FISEROVA,TEREZA",
+            "SATILA,ANA",
+            "FOX,JESSICA",
+            "HERZOG,ANDREA",
+            "WERATSCHNIG,NADINE",
+            "LILIK,ELENA",
+            "SATKOVA,GABRIELA",
+            "WOODS,KIMBERLEY",
+            "ZWOLINSKA,KLAUDIA",
+            "MINAZOVA,ALSU",
+            "LEIBFARTH,EVY"
+        ]
+    },
+    "MK1": {
+        "description": "Men's Kayak Single (K1M)",
+        "athletes": [
+            "TUNKA,ONDREJ",
+            "PRINDIS,VIT",
+            "KAUZER,PETER",
+            "AIGNER,HANNES",
+            "PRSKAVEC,JIRI",
+            "EIGEL,PAVEL",
+            "LLORENTE,DAVID",
+            "CRESPO,JOAN",
+            "NEVEU,BORIS",
+            "BEDA,MARCELLO",
+            "GENNARO,GIOVANNI DE",
+            "SOUDI,MATHIS",
+            "CASTRYCK,TITOUAN",
+            "KREJCI,JAKUB",
+            "GRIGAR,JAKUB",
+            "ECHANIZ,PAU"
+        ]
+    },
+    "WK1": {
+        "description": "Women's Kayak Single (K1W)",
+        "athletes": [
+            "FOX,JESSICA",
+            "DUKATOVA,JANA",
+            "FUNK,RICARDA",
+            "FRANKLIN,MALLORY",
+            "TERCELJ,EVA",
+            "JONES,LUUKA",
+            "WOODS,KIMBERLEY",
+            "LILIK,ELENA",
+            "MINTALOVA,ELISKA",
+            "ZWOLINSKA,KLAUDIA",
+            "ECKHARDT,KATE",
+            "CHOURRAUT,MAIALEN"
+        ]
+    },
+    "WX1": {
+        "description": "Women's Extreme Slalom (WCSLX)",
+        "athletes": [
+            "FOX,JESSICA",
+            "WOODS,KIMBERLEY",
+            "DORIA,MONICA",
+            "PRIGENT,CAMILLE",
+            "TERCELJ,EVA",
+            "HUG,ANGELE",
+            "ZWOLINSKA,KLAUDIA",
+            "LILIK,ELENA",
+            "LEIBFARTH,EVY",
+            "FOX,NOEMIE"
+        ]
+    },
+    "MX1": {
+        "description": "Men's Extreme Slalom (MCSLX)",
+        "athletes": [
+            "CLARKE,JOE",
+            "DELASSUS,ANATOLE",
+            "HENGST,STEFAN",
+            "NEVEU,BORIS",
+            "DOUGOUD,MARTIN",
+            "MADORE,MATHURIN",
+            "NOVAK,MATYAS",
+            "BUTCHER,FINN",
+            "HEGGE,NOAH",
+            "LEITNER,MARIO"
+        ]
+    }
+}

@@ -1,0 +1,230 @@
+{
+  "byYear": {
+    "2021": {
+      "racesPerPeriod": {
+        "q1": 1,
+        "q3": 3
+      },
+      "cumulativeRaces": {
+        "q1": 1,
+        "q3": 3
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "2022": {
+      "racesPerPeriod": {
+        "q1": 7,
+        "q3": 8
+      },
+      "cumulativeRaces": {
+        "q1": 8,
+        "q3": 10
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "2023": {
+      "racesPerPeriod": {
+        "q1": 7,
+        "q3": 9
+      },
+      "cumulativeRaces": {
+        "q1": 15.5,
+        "q3": 18.75
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "2024": {
+      "racesPerPeriod": {
+        "q1": 8,
+        "q3": 10.75
+      },
+      "cumulativeRaces": {
+        "q1": 21.25,
+        "q3": 29
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "2025": {
+      "racesPerPeriod": {
+        "q1": 9,
+        "q3": 11
+      },
+      "cumulativeRaces": {
+        "q1": 28,
+        "q3": 40
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    }
+  },
+  "byAge": {
+    "21": {
+      "racesPerPeriod": {
+        "q1": 1.5,
+        "q3": 6.5
+      },
+      "cumulativeRaces": {
+        "q1": 1.5,
+        "q3": 21
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "22": {
+      "racesPerPeriod": {
+        "q1": 3,
+        "q3": 7
+      },
+      "cumulativeRaces": {
+        "q1": 4.75,
+        "q3": 8.25
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "23": {
+      "racesPerPeriod": {
+        "q1": 3.5,
+        "q3": 7
+      },
+      "cumulativeRaces": {
+        "q1": 5,
+        "q3": 13.5
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "24": {
+      "racesPerPeriod": {
+        "q1": 4,
+        "q3": 8
+      },
+      "cumulativeRaces": {
+        "q1": 4.25,
+        "q3": 16.25
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "25": {
+      "racesPerPeriod": {
+        "q1": 7,
+        "q3": 9.75
+      },
+      "cumulativeRaces": {
+        "q1": 11.25,
+        "q3": 25.5
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "26": {
+      "racesPerPeriod": {
+        "q1": 5,
+        "q3": 11
+      },
+      "cumulativeRaces": {
+        "q1": 19,
+        "q3": 21
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "27": {
+      "racesPerPeriod": {
+        "q1": 4.25,
+        "q3": 10.5
+      },
+      "cumulativeRaces": {
+        "q1": 12.75,
+        "q3": 31
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "28": {
+      "racesPerPeriod": {
+        "q1": 6.25,
+        "q3": 9.25
+      },
+      "cumulativeRaces": {
+        "q1": 14.5,
+        "q3": 38.25
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "29": {
+      "racesPerPeriod": {
+        "q1": 3.5,
+        "q3": 9
+      },
+      "cumulativeRaces": {
+        "q1": 7,
+        "q3": 21
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "30": {
+      "racesPerPeriod": {
+        "q1": 7.5,
+        "q3": 9
+      },
+      "cumulativeRaces": {
+        "q1": 14.5,
+        "q3": 29.5
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    },
+    "31": {
+      "racesPerPeriod": {
+        "q1": 5.75,
+        "q3": 7.25
+      },
+      "cumulativeRaces": {
+        "q1": 19,
+        "q3": 23
+      },
+      "avgQualityPenalty": {
+        "q1": 0,
+        "q3": 0
+      }
+    }
+  }
+}
